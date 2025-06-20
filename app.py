@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, send_from_
 from utils.poster_maker import generate_poster
 import sqlite3
 from werkzeug.utils import secure_filename
+from scraper import scrape_indiamart
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -58,6 +59,22 @@ def index():
         conn.close()
         return render_template('index.html', poster_url=url_for('static', filename=f'posters/{poster_filename}'), caption=caption)
     return render_template('index.html')
+
+@app.route('/scrape', methods=['POST'])
+def scrape():
+    competitor_url = request.form.get('competitor_url')
+    products = []
+    scrape_message = None
+    if competitor_url and 'indiamart' in competitor_url:
+        try:
+            products = scrape_indiamart(competitor_url)
+            if not products:
+                scrape_message = 'No products found or page structure changed.'
+        except Exception as e:
+            scrape_message = f'Error scraping IndiaMART: {e}'
+    else:
+        scrape_message = 'Only IndiaMART URLs are supported for now.'
+    return render_template('index.html', products=products, scrape_message=scrape_message)
 
 if __name__ == '__main__':
     app.run(debug=True) 
