@@ -20,22 +20,10 @@ endblock %} {% block content %}
         <label>Product Image:</label><br />
         <input type="file" name="image" accept="image/*" required /><br />
       </div>
-      <button
-        type="submit"
-        style="
-          width: 100%;
-          font-size: 1.15rem;
-          padding: 12px 0;
-          background-color: #007bff;
-          color: white;
-          border: none;
-          border-radius: 6px;
-        "
-      >
-        Generate Poster
-      </button>
+      <button type="submit" class="submit-btn">Generate Poster</button>
     </form>
   </div>
+
   <div class="poster-preview card">
     {% if poster_url %}
     <h2 style="margin-bottom: 10px">Generated Poster</h2>
@@ -52,61 +40,91 @@ endblock %} {% block content %}
 </div>
 {% endblock %} {% block head %}
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   .main-flex {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 48px;
     margin-top: 60px;
+    padding: 0 16px;
+    flex-wrap: wrap;
   }
+
   .card {
     background: rgba(255, 255, 255, 0.97);
     border-radius: 20px;
     box-shadow: 0 6px 32px rgba(0, 0, 0, 0.13);
-    padding: 40px 20px 36px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    max-width: 540px;
+    padding: 36px 24px;
+    box-sizing: border-box;
   }
+
   .main-container,
   .poster-preview {
-    width: 540px;
-    min-height: 480px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  form {
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-  .main-container {
-    height: 480px;
-    justify-content: center;
-  }
+
   .form-section {
-    margin-bottom: 16px;
     width: 100%;
+    margin-bottom: 18px;
   }
+
   .form-section input,
   .form-section textarea {
-    max-width: 460px;
-    margin-left: auto;
-    margin-right: auto;
     width: 100%;
-    box-sizing: border-box;
-    padding: 8px 10px;
+    max-width: 460px;
+    padding: 10px 12px;
+    font-size: 1rem;
     border-radius: 6px;
     border: 1px solid #bbb;
-    font-size: 1rem;
-    margin-top: 6px;
     background: #f8fafd;
     transition: border 0.2s;
   }
+
   .form-section input:focus,
   .form-section textarea:focus {
     border: 1.5px solid #007bff;
     outline: none;
     background: #fff;
   }
-  .poster-preview {
-    height: 480px;
-    justify-content: center;
+
+  .submit-btn {
+    width: 100%;
+    max-width: 460px;
+    font-size: 1.15rem;
+    padding: 12px 0;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
   }
+
+  .submit-btn:hover {
+    background-color: #0056b3;
+  }
+
   .poster-preview img {
     max-width: 380px;
     max-height: 260px;
@@ -114,6 +132,7 @@ endblock %} {% block content %}
     margin-bottom: 14px;
     border-radius: 8px;
   }
+
   .download-btn {
     display: inline-block;
     margin-top: 10px;
@@ -124,19 +143,32 @@ endblock %} {% block content %}
     border-radius: 6px;
     font-size: 1.1rem;
   }
+
   .download-btn:hover {
     background: #0056b3;
   }
+
   @media (max-width: 1200px) {
     .main-flex {
       flex-direction: column;
       align-items: center;
-      gap: 32px;
     }
-    .main-container,
-    .poster-preview {
-      width: 98vw;
+
+    .card {
+      width: 100%;
       max-width: 600px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .card {
+      padding: 24px 16px;
+    }
+
+    .form-section input,
+    .form-section textarea,
+    .submit-btn {
+      max-width: 100%;
     }
   }
 </style>

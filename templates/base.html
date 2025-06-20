@@ -5,18 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Market Min{% endblock %}</title>
     <style>
+      @font-face {
+        font-family: "Varsity Regular";
+        src: url("{{ url_for('static', filename='fonts/varsity_regular.ttf') }}")
+          format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        width: 100%;
         font-family: "Segoe UI", Arial, sans-serif;
-        background: url({{url_for(
-              "static",
-              filename= "posters/background_image.png"
-            )}})
+        background: url("{{ url_for('static', filename='posters/background_image.png') }}")
           no-repeat center center fixed;
         background-size: cover;
       }
+
       .navbar {
-        width: 100vw;
+        width: 100%;
         position: sticky;
         top: 0;
         z-index: 100;
@@ -26,21 +38,26 @@
         -webkit-backdrop-filter: blur(12px) saturate(180%);
         display: flex;
         align-items: center;
+        justify-content: space-between;
         padding: 0 32px;
         height: 64px;
       }
+
       .navbar-title {
+        font-family: "Varsity Regular", sans-serif;
         font-size: 2rem;
-        font-weight: 700;
+        font-weight: 400;
         color: #222;
         letter-spacing: 1px;
         margin-right: 32px;
         text-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
       }
+
       .navbar-links {
         display: flex;
         gap: 18px;
       }
+
       .navbar-link {
         color: #222;
         text-decoration: none;
@@ -50,13 +67,41 @@
         border-radius: 8px;
         transition: background 0.2s, color 0.2s;
       }
+
       .navbar-link:hover,
       .navbar-link.active {
         background: rgba(0, 123, 255, 0.12);
         color: #007bff;
       }
+
       main {
         margin-top: 32px;
+      }
+
+      @media (max-width: 768px) {
+        .navbar {
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: auto;
+          padding: 16px;
+        }
+
+        .navbar-title {
+          margin: 0 0 10px 0;
+          text-align: center;
+        }
+
+        .navbar-links {
+          flex-direction: column;
+          gap: 10px;
+          align-items: center;
+        }
+
+        .navbar-link {
+          padding: 8px 14px;
+          font-size: 1rem;
+        }
       }
     </style>
     {% block head %}{% endblock %}
