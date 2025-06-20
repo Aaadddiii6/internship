@@ -1,0 +1,143 @@
+{% extends 'base.html' %} {% block title %}Poster Generator | Market Min{%
+endblock %} {% block content %}
+<div class="main-flex">
+  <div class="main-container card">
+    <h1 style="margin-bottom: 18px">Product Poster Maker</h1>
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-section">
+        <label>Product Name:</label><br />
+        <input type="text" name="product_name" required /><br />
+      </div>
+      <div class="form-section">
+        <label>Price:</label><br />
+        <input type="text" name="price" required /><br />
+      </div>
+      <div class="form-section">
+        <label>Description:</label><br />
+        <textarea name="description" rows="3" required></textarea><br />
+      </div>
+      <div class="form-section">
+        <label>Product Image:</label><br />
+        <input type="file" name="image" accept="image/*" required /><br />
+      </div>
+      <button
+        type="submit"
+        style="
+          width: 100%;
+          font-size: 1.15rem;
+          padding: 12px 0;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 6px;
+        "
+      >
+        Generate Poster
+      </button>
+    </form>
+  </div>
+  <div class="poster-preview card">
+    {% if poster_url %}
+    <h2 style="margin-bottom: 10px">Generated Poster</h2>
+    <img src="{{ poster_url }}" alt="Poster Preview" /><br />
+    <h3 style="margin-bottom: 6px">Caption:</h3>
+    <p style="text-align: center">{{ caption }}</p>
+    <a href="{{ poster_url }}" download class="download-btn">Download Poster</a>
+    {% else %}
+    <p style="text-align: center">
+      No poster generated yet. Fill the form and submit to see your poster here.
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %} {% block head %}
+<style>
+  .main-flex {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 48px;
+    margin-top: 60px;
+  }
+  .card {
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 20px;
+    box-shadow: 0 6px 32px rgba(0, 0, 0, 0.13);
+    padding: 40px 20px 36px 20px;
+  }
+  .main-container,
+  .poster-preview {
+    width: 540px;
+    min-height: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .main-container {
+    height: 480px;
+    justify-content: center;
+  }
+  .form-section {
+    margin-bottom: 16px;
+    width: 100%;
+  }
+  .form-section input,
+  .form-section textarea {
+    max-width: 460px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    font-size: 1rem;
+    margin-top: 6px;
+    background: #f8fafd;
+    transition: border 0.2s;
+  }
+  .form-section input:focus,
+  .form-section textarea:focus {
+    border: 1.5px solid #007bff;
+    outline: none;
+    background: #fff;
+  }
+  .poster-preview {
+    height: 480px;
+    justify-content: center;
+  }
+  .poster-preview img {
+    max-width: 380px;
+    max-height: 260px;
+    border: 1px solid #ccc;
+    margin-bottom: 14px;
+    border-radius: 8px;
+  }
+  .download-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 22px;
+    background: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+  }
+  .download-btn:hover {
+    background: #0056b3;
+  }
+  @media (max-width: 1200px) {
+    .main-flex {
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+    .main-container,
+    .poster-preview {
+      width: 98vw;
+      max-width: 600px;
+    }
+  }
+</style>
+{% endblock %}

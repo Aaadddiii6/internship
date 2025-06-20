@@ -1,0 +1,97 @@
+{% extends 'base.html' %} {% block title %}Scraper | Market Min{% endblock %} {%
+block content %}
+<div class="scrape-table-container">
+  <h2>Competitor Products</h2>
+  <form
+    method="POST"
+    action="/scraper"
+    style="margin-bottom: 24px; display: flex; gap: 12px; align-items: center"
+  >
+    <input
+      type="url"
+      name="competitor_url"
+      placeholder="Paste competitor product/search URL here..."
+      required
+      style="
+        flex: 1;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #bbb;
+        font-size: 1rem;
+      "
+    />
+    <button
+      type="submit"
+      style="
+        padding: 10px 22px;
+        border-radius: 6px;
+        background: #007bff;
+        color: #fff;
+        border: none;
+        font-size: 1rem;
+      "
+    >
+      Scrape
+    </button>
+  </form>
+  {% if products and products|length > 0 %}
+  <div style="overflow-x: auto">
+    <table style="width: 100%; border-collapse: collapse">
+      <thead>
+        <tr style="background: #f5f5f5">
+          <th style="padding: 10px; border-bottom: 1px solid #ddd">Name</th>
+          <th style="padding: 10px; border-bottom: 1px solid #ddd">Price</th>
+          <th style="padding: 10px; border-bottom: 1px solid #ddd">
+            Description
+          </th>
+          <th style="padding: 10px; border-bottom: 1px solid #ddd">Platform</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #eee">
+            {{ p.name }}
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee">
+            {{ p.price }}
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee">
+            {{ p.description }}
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee">
+            {{ p.platform }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% elif scrape_message %}
+  <div style="text-align: center; color: #888; padding: 32px 0">
+    {{ scrape_message }}
+  </div>
+  {% else %}
+  <div
+    id="scrape-table-placeholder"
+    style="text-align: center; color: #888; padding: 32px 0"
+  >
+    No competitor data yet. Enter a URL and scrape to see results here.
+  </div>
+  {% endif %}
+</div>
+{% endblock %} {% block head %}
+<style>
+  .scrape-table-container {
+    width: 80vw;
+    max-width: 1100px;
+    margin: 40px auto 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    padding: 32px 24px;
+    min-height: 120px;
+    overflow-x: auto;
+  }
+</style>
+{% endblock %}

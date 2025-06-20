@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Market Min{% endblock %}</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: url({{url_for(
+              "static",
+              filename= "posters/background_image.png"
+            )}})
+          no-repeat center center fixed;
+        background-size: cover;
+      }
+      .navbar {
+        width: 100vw;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+        display: flex;
+        align-items: center;
+        padding: 0 32px;
+        height: 64px;
+      }
+      .navbar-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #222;
+        letter-spacing: 1px;
+        margin-right: 32px;
+        text-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+      }
+      .navbar-links {
+        display: flex;
+        gap: 18px;
+      }
+      .navbar-link {
+        color: #222;
+        text-decoration: none;
+        font-size: 1.1rem;
+        font-weight: 500;
+        padding: 8px 18px;
+        border-radius: 8px;
+        transition: background 0.2s, color 0.2s;
+      }
+      .navbar-link:hover,
+      .navbar-link.active {
+        background: rgba(0, 123, 255, 0.12);
+        color: #007bff;
+      }
+      main {
+        margin-top: 32px;
+      }
+    </style>
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-title">Market Min</div>
+      <div class="navbar-links">
+        <a
+          href="/poster"
+          class="navbar-link{% if request.path == '/poster' or request.path == '/' %} active{% endif %}"
+          >Poster Generator</a
+        >
+        <a
+          href="/scraper"
+          class="navbar-link{% if request.path == '/scraper' %} active{% endif %}"
+          >Scraper</a
+        >
+      </div>
+    </nav>
+    <main>{% block content %}{% endblock %}</main>
+  </body>
+</html>

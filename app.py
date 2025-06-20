@@ -36,7 +36,8 @@ def init_db():
 init_db()
 
 @app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/poster', methods=['GET', 'POST'])
+def poster():
     if request.method == 'POST':
         product_name = request.form['product_name']
         price = request.form['price']
@@ -49,32 +50,31 @@ def index():
         else:
             image_filename = None
             image_path = None
-        # Generate poster and caption
         poster_filename, caption = generate_poster(product_name, price, description, image_path)
-        # Save to DB
         conn = get_db_connection()
         conn.execute('INSERT INTO posters (product_name, price, description, image_filename, poster_filename, caption) VALUES (?, ?, ?, ?, ?, ?)',
                      (product_name, price, description, image_filename, poster_filename, caption))
         conn.commit()
         conn.close()
-        return render_template('index.html', poster_url=url_for('static', filename=f'posters/{poster_filename}'), caption=caption)
-    return render_template('index.html')
+        return render_template('poster.html', poster_url=url_for('static', filename=f'posters/{poster_filename}'), caption=caption)
+    return render_template('poster.html')
 
-@app.route('/scrape', methods=['POST'])
-def scrape():
-    competitor_url = request.form.get('competitor_url')
+@app.route('/scraper', methods=['GET', 'POST'])
+def scraper():
     products = []
     scrape_message = None
-    if competitor_url and 'indiamart' in competitor_url:
-        try:
-            products = scrape_indiamart(competitor_url)
-            if not products:
-                scrape_message = 'No products found or page structure changed.'
-        except Exception as e:
-            scrape_message = f'Error scraping IndiaMART: {e}'
-    else:
-        scrape_message = 'Only IndiaMART URLs are supported for now.'
-    return render_template('index.html', products=products, scrape_message=scrape_message)
+    if request.method == 'POST':
+        competitor_url = request.form.get('competitor_url')
+        if competitor_url and 'indiamart' in competitor_url:
+            try:
+                products = scrape_indiamart(competitor_url)
+                if not products:
+                    scrape_message = 'No products found or page structure changed.'
+            except Exception as e:
+                scrape_message = f'Error scraping IndiaMART: {e}'
+        else:
+            scrape_message = 'Only IndiaMART URLs are supported for now.'
+    return render_template('scraper.html', products=products, scrape_message=scrape_message)
 
 if __name__ == '__main__':
     app.run(debug=True) 
