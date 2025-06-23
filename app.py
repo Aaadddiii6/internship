@@ -1,9 +1,9 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
-from utils.poster_maker import generate_poster
+from utils.poster_maker import generate_poster, extract_reviews, analyze_sentiment
 import sqlite3
 from werkzeug.utils import secure_filename
-from scraper import scrape_indiamart
+from scraper import scrape_indiamart, scrape_flipkart, scrape_amazon
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -65,15 +65,50 @@ def scraper():
     scrape_message = None
     if request.method == 'POST':
         competitor_url = request.form.get('competitor_url')
-        if competitor_url and 'indiamart' in competitor_url:
+        if competitor_url:
             try:
-                products = scrape_indiamart(competitor_url)
-                if not products:
+                if 'indiamart' in competitor_url:
+                    products = scrape_indiamart(competitor_url)
+                elif 'flipkart' in competitor_url:
+                    result = scrape_flipkart(competitor_url)
+                    if isinstance(result, dict):
+                        products = result.get('products', [])
+                        if result.get('error'):
+                            scrape_message = result['error']
+                    else:
+                        products = result
+                elif 'amazon' in competitor_url:
+                    products = scrape_amazon(competitor_url)
+                else:
+                    scrape_message = 'Only IndiaMART, Flipkart, and Amazon URLs are supported for now.'
+                # For each product, extract reviews and compute sentiment
+                for idx, p in enumerate(products):
+                    product_url = p.get('product_url')
+                    platform = p.get('platform')
+                    try:
+                        reviews = extract_reviews(product_url, platform)
+                        used_mock = False
+                        if not reviews and platform and platform.lower() in ('flipkart', 'amazon'):
+                            print(f"[DEBUG] No real reviews found for {p.get('name')}, using mock reviews.")
+                            reviews = extract_reviews(None, 'indiamart')
+                            used_mock = True
+                        else:
+                            print(f"[DEBUG] Using real reviews for {p.get('name')}, count: {len(reviews)}")
+                        sentiment, _ = analyze_sentiment(reviews)
+                        if isinstance(sentiment, float):
+                            p['sentiment'] = {'positive': 0.0, 'negative': 0.0, 'neutral': 1.0, 'avg': sentiment}
+                        else:
+                            p['sentiment'] = sentiment
+                        print(f"[DEBUG] {p.get('name')} | Sentiment: {p['sentiment']} | Source: {'mock' if used_mock else 'real'}")
+                    except Exception as e:
+                        print(f"[ERROR] Sentiment extraction failed for {p.get('name')}: {e}")
+                        p['sentiment'] = {'positive': 0.0, 'negative': 0.0, 'neutral': 1.0, 'avg': 0.0}
+                if not products and not scrape_message:
                     scrape_message = 'No products found or page structure changed.'
             except Exception as e:
-                scrape_message = f'Error scraping IndiaMART: {e}'
+                scrape_message = f'Error scraping: {e}'
         else:
-            scrape_message = 'Only IndiaMART URLs are supported for now.'
+            scrape_message = 'Please enter a valid URL.'
     return render_template('scraper.html', products=products, scrape_message=scrape_message)
 
 if __name__ == '__main__':
