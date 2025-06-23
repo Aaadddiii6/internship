@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
+import traceback
 
 
 def scrape_indiamart(url):
@@ -13,18 +14,23 @@ def scrape_indiamart(url):
     resp = requests.get(url, headers=headers)
     soup = BeautifulSoup(resp.text, 'html.parser')
     products = []
-    for card in soup.select('.card'):
-        name = card.select_one('.producttitle a')
-        price = card.select_one('.price, .getquote')
-        desc = card.select_one('.producttitle .tooltip span')
+    for card in soup.select('div.card'):
+        name_tag = card.select_one('div.producttitle a.cardlinks')
+        price_tag = card.select_one('p.price, p.getquote')
+        desc_tag = card.select_one('div.producttitle a.cardlinks')
+        name = name_tag.get_text(strip=True) if name_tag else 'N/A'
+        price = price_tag.get_text(strip=True) if price_tag else 'N/A'
+        description = desc_tag.get_text(strip=True) if desc_tag else 'N/A'
         products.append({
-            'name': name.get_text(strip=True) if name else 'N/A',
-            'price': price.get_text(strip=True) if price else 'N/A',
-            'description': desc.get_text(strip=True) if desc else 'N/A',
+            'name': name,
+            'price': price,
+            'description': description,
             'platform': 'IndiaMART'
         })
         if len(products) >= 10:
             break
+    if not products:
+        print('[DEBUG] IndiaMART: No products found. Check selectors or anti-bot.')
     return products
 
 
@@ -54,34 +60,48 @@ def scrape_flipkart(url, cookie_str=None, max_retries=3):
         try:
             resp = requests.get(url, headers=headers, cookies=cookies, timeout=10)
             soup = BeautifulSoup(resp.text, 'html.parser')
+            print("[DEBUG] Flipkart title:", soup.title)
+            print("[DEBUG] Flipkart status code:", resp.status_code)
             # Detect anti-bot/"rush" page
             if soup.find(string=lambda s: isinstance(s, str) and ("Lot of rush" in s or "Retry in" in s)):
                 last_error = "Blocked by Flipkart anti-bot. Try again later or use browser cookies."
                 time.sleep(2 ** attempt)  # Exponential backoff
                 continue
             products = []
-            for card in soup.select('a.CGtC98'):
-                name = card.find('div', class_='KzDlHZ')
-                price = card.find('div', class_='Nx9bqj _4b5DiR')
-                desc_ul = card.find('ul', class_='G4BRas')
-                description = None
-                if desc_ul and isinstance(desc_ul, Tag):
-                    description = ' | '.join(li.get_text(strip=True) for li in desc_ul.find_all('li'))
-                href = card.get('href')
-                product_url = f'https://www.flipkart.com{href}' if isinstance(href, str) and href.startswith('/') else href
-                products.append({
-                    'name': name.get_text(strip=True) if name else 'N/A',
-                    'price': price.get_text(strip=True) if price else 'N/A',
-                    'description': description if description else 'N/A',
-                    'platform': 'Flipkart',
-                    'product_url': product_url
-                })
-                if len(products) >= 10:
-                    break
+            cards = soup.select('a.CGtC98')
+            if not cards:
+                print('[WARNING] Flipkart: No product cards found with selector a.CGtC98. HTML snippet:', resp.text[:500])
+            for card in cards:
+                try:
+                    name = card.find('div', class_='KzDlHZ')
+                    price = card.find('div', class_='Nx9bqj _4b5DiR')
+                    if not price:
+                        price = card.find('div', class_='_30jeq3')
+                    desc_ul = card.find('ul', class_='G4BRas')
+                    description = None
+                    if desc_ul and isinstance(desc_ul, Tag):
+                        description = ' | '.join(li.get_text(strip=True) for li in desc_ul.find_all('li'))
+                    href = card.get('href')
+                    product_url = f'https://www.flipkart.com{href}' if isinstance(href, str) and href.startswith('/') else href
+                    products.append({
+                        'name': name.get_text(strip=True) if name else 'N/A',
+                        'price': price.get_text(strip=True) if price else 'N/A',
+                        'description': description if description else 'N/A',
+                        'platform': 'Flipkart',
+                        'product_url': product_url
+                    })
+                    if len(products) >= 10:
+                        break
+                except Exception as parse_e:
+                    print(f"[ERROR] Flipkart product parsing failed: {parse_e}")
+                    traceback.print_exc()
             if products:
                 return {'products': products, 'error': None}
+            print('[DEBUG] Flipkart: No products found. HTML snippet:', resp.text[:500])
             last_error = "No products found. Flipkart may have changed their layout or blocked the request."
         except Exception as e:
+            print(f"[ERROR] Flipkart scraping failed: {e}")
+            traceback.print_exc()
             last_error = str(e)
             time.sleep(2 ** attempt)
     return {'products': [], 'error': last_error}
