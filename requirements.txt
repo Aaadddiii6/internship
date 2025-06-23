@@ -2,3 +2,4 @@ Flask
 Pillow 
 vaderSentiment
 gunicorn
+beautifulsoup4
