@@ -3,3 +3,6 @@ Pillow
 vaderSentiment
 gunicorn
 beautifulsoup4
+requests
+beautifulsoup4
+lxml
