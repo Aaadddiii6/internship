@@ -1,4 +1,4 @@
 Flask
 Pillow 
 vaderSentiment
-gunicornpyth
+gunicorn
